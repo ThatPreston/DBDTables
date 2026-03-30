@@ -1,0 +1,14 @@
+[project]
+name = "dbdtables"
+version = "1.0.0"
+dependencies = [
+    "pythonnet",
+    "pycryptodome"
+]
+requires-python = ">=3.13"
+description = "A tool that automatically generates up-to-date cosmetic datatables for Dead By Daylight."
+readme = "README.md"
+license = "MIT"
+authors = [
+    {name = "ThatPreston"}
+]
