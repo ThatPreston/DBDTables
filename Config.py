@@ -12,8 +12,19 @@ gameFilesPath = rootPath / "files/game"
 decryptedFilesPath = rootPath / "files/decrypted"
 
 def load():
-    with open(Path(rootPath) / "config.json", "r", encoding = "utf-8") as f:
-        return json.load(f)
+    path = rootPath / "config.json"
+    if path.is_file():
+        with open(path, "r", encoding = "utf-8") as f:
+            return json.load(f)
+    # Default Config
+    return {
+        "gameVersion": "9.5.1_live",
+        "paksFolder": "",
+        "mappingFile": "",
+        "enabledLanguages": ["de", "en", "es", "es-MX", "fr", "it", "ja", "ko", "pl", "pt-BR", "ru", "th", "tr", "zh-Hans", "zh-Hant"],
+        "aesKey": "0x22b1639b548124925cf7b9cbaa09f9ac295fcf0324586d6b37ee1d42670b39b3",
+        "accessKeys": {}
+    }
 
 configFile = load()
 
