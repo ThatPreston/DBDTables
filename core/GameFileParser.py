@@ -106,6 +106,29 @@ def getActualCategory(category, character, killer):
             return "hands"
     return category
 
+survivorIndexOverrides = {
+    # Game order: Kate, Quentin, Tapp
+    # Wiki order: Quentin, Tapp, Kate
+    10: 12,
+    11: 10,
+    12: 11
+}
+
+killerIndexOverrides = {
+    # Game order: Hag, Shape
+    # Wiki order: Shape, Hag
+    4: 5,
+    5: 4
+}
+
+def getCharacter(index):
+    # 268435456 is the CharacterIndex of K01, so if AssociatedCharacter is greater than or equal to this value, the character is a killer
+    if index >= 268435456:
+        index -= 268435456
+        return killerIndexOverrides.get(index, index), True
+    else:
+        return survivorIndexOverrides.get(index, index), False
+
 # Loads a single CustomizationItemDB.json file
 def loadCustomizationItemDB(path):
     itemDB = []
@@ -133,11 +156,7 @@ def loadCustomizationItemDB(path):
             # Skip this for charms, badges, and banners since they are universal
             if not category in universalCategories:
                 # Character
-                character = entry["AssociatedCharacter"]
-                # 268435456 is the CharacterIndex of K01, so if AssociatedCharacter is greater than or equal to this value, the character is a killer
-                killer = character >= 268435456
-                if killer:
-                    character -= 268435456
+                character, killer = getCharacter(entry["AssociatedCharacter"])
                 # Map the category to a subcategory based on the character
                 category = getActualCategory(category, character, killer)
                 # Add 1 to the survivor/killer since lua has 1-based indexing
