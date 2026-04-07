@@ -13,8 +13,8 @@ categoryMap = {
     "ECustomizationCategory::KillerHead": "masks",
     "ECustomizationCategory::KillerBody": "bodies",
     "ECustomizationCategory::KillerWeapon": "weapons",
-    #"ECustomizationCategory::Badge": "badges",
-    #"ECustomizationCategory::Banner": "banners"
+    "ECustomizationCategory::Badge": "badges",
+    "ECustomizationCategory::Banner": "banners"
 }
 
 # Item categories which do not have an associated character
@@ -79,6 +79,7 @@ rarityMap = {
 
 # These outfits already exist under a different ID and should be ignored
 ignoredOutfits = ["Laurie_outfit_006", "MT_outfit_022_CS"]
+ignoredItems = ["Default_Badge", "Default_Banner"]
 
 def getDescription(data):
     desc = data["UIData"]["Description"]
@@ -195,11 +196,14 @@ def loadCustomizationItems():
     ids = {}
     for itemDB in itemDBList:
         for item in itemDB:
+            key = item["key"]
+            if key in ignoredItems:
+                continue
             category = item["category"]
             if not category in ids:
                 ids[category] = 1
             item["id"] = ids[category]
-            items[item["key"]] = item
+            items[key] = item
             ids[category] += 1
     return items
 
