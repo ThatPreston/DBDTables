@@ -1,6 +1,6 @@
 [project]
 name = "dbdtables"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
     "pythonnet",
     "pycryptodome"
