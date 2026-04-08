@@ -2,7 +2,7 @@ import math
 import Config
 from utils import FileManager
 
-validItemTypes = ["Head", "Torso", "Legs", "Weapon"]
+validItemTypes = ["Head", "Torso", "Legs", "Weapon", "Charm", "Badge", "Banner"]
 
 def reformatReleaseDate(s):
     date = s.split("T")[0]
@@ -47,16 +47,14 @@ def createTables(data):
     items = {}
     outfits = {}
     for entry in data:
-        category = entry["categories"][0]
-        if category == "item":
+        if "metaData" in entry:
             key = entry["id"]
-            metaData = entry["metaData"]
-            itemType = metaData["type"]
-            if itemType in validItemTypes:
-                items[key] = createItem(entry)
-        elif category == "outfit":
-            key = entry["id"]
-            outfits[key] = createOutfit(entry)
+            categories = entry["categories"]
+            if "item" in categories:
+                if entry["metaData"]["type"] in validItemTypes:
+                    items[key] = createItem(entry)
+            elif "outfit" in categories:
+                outfits[key] = createOutfit(entry)
     return items, outfits
 
 # Usually only individual items have prices, whereas outfits have a "discountPercentage"
