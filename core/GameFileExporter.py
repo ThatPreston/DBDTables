@@ -25,12 +25,17 @@ from System import StringComparer
 provider = None
 exportList = []
 
+def getVersionContainer():
+    version = tuple(map(int, Config.gameVersion.split("_")[0].split(".")))
+    if version < (9, 6, 0):
+        return VersionContainer(EGame.GAME_DeadByDaylight_Old)
+    return VersionContainer(EGame.GAME_DeadByDaylight)
+
 def init():
     global provider
     if provider is None:
         OodleHelper.Initialize(Config.librariesDir + OodleHelper.OODLE_NAME_CURRENT)
-        version = VersionContainer(EGame.GAME_DeadByDaylight)
-        provider = DefaultFileProvider(DirectoryInfo(Config.paksFolder), [], SearchOption.TopDirectoryOnly, version, StringComparer.OrdinalIgnoreCase)
+        provider = DefaultFileProvider(DirectoryInfo(Config.paksFolder), [], SearchOption.TopDirectoryOnly, getVersionContainer(), StringComparer.OrdinalIgnoreCase)
         provider.MappingsContainer = FileUsmapTypeMappingsProvider(Config.mappingFile)
         provider.Initialize()
         provider.SubmitKey(FGuid(0), FAesKey(Config.aesKey))
