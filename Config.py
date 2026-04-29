@@ -18,7 +18,7 @@ def load():
             return json.load(f)
     # Default Config
     return {
-        "gameVersion": "9.5.2_live",
+        "gameVersion": "9.6.0_live",
         "paksFolder": "",
         "mappingFile": "",
         "enabledLanguages": ["de", "en", "es", "es-MX", "fr", "it", "ja", "ko", "pl", "pt-BR", "ru", "th", "tr", "zh-Hans", "zh-Hant"],
