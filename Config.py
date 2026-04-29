@@ -28,7 +28,7 @@ def load():
 
 configFile = load()
 
-version = "1.0.2"
+version = "1.0.3"
 gameVersion = configFile["gameVersion"]
 paksFolder = configFile["paksFolder"]
 mappingFile = configFile["mappingFile"]

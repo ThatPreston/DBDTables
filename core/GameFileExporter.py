@@ -12,7 +12,7 @@ clr.AddReference(Config.librariesDir + "CUE4Parse.dll")
 
 from CUE4Parse.FileProvider import DefaultFileProvider
 from CUE4Parse.MappingsProvider import FileUsmapTypeMappingsProvider
-from CUE4Parse.Compression import OodleHelper
+from CUE4Parse.Compression import OodleHelper, ZlibHelper
 from CUE4Parse.Encryption.Aes import FAesKey
 from CUE4Parse.UE4.Localization import FTextLocalizationResource
 from CUE4Parse.UE4.Versions import VersionContainer, EGame, ELanguage
@@ -35,6 +35,7 @@ def init():
     global provider
     if provider is None:
         OodleHelper.Initialize(Config.librariesDir + OodleHelper.OODLE_NAME_CURRENT)
+        ZlibHelper.Initialize(Config.librariesDir + ZlibHelper.DLL_NAME)
         provider = DefaultFileProvider(DirectoryInfo(Config.paksFolder), [], SearchOption.TopDirectoryOnly, getVersionContainer(), StringComparer.OrdinalIgnoreCase)
         provider.MappingsContainer = FileUsmapTypeMappingsProvider(Config.mappingFile)
         provider.Initialize()

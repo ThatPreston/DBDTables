@@ -20,7 +20,6 @@ calibri = ("Calibri", 12)
 style = ttk.Style()
 style.configure("Custom.TButton", font = calibri)
 style.configure("Custom.TLabel", font = calibri)
-style.configure("Custom.TEntry", font = calibri)
 
 frame = ttk.Frame(root, padding = (16, 16, 16, 16))
 frame.grid(column = 0, row = 0, sticky = "nsew")
@@ -80,11 +79,11 @@ def toggleButtons(enabled):
 # No point in allowing other branches since users can't install them
 validBranches = ["live", "ptb"]
 
-def validateVersion(versionString):
-    s = versionString.split("_")
-    if len(s) == 2:
-        version = s[0]
-        branch = s[1]
+def isVersionStringValid(versionString):
+    parts = versionString.split("_")
+    if len(parts) == 2:
+        version = parts[0]
+        branch = parts[1]
         if branch in validBranches:
             versionComponents = version.split(".")
             if len(versionComponents) == 3:
@@ -93,6 +92,30 @@ def validateVersion(versionString):
                         return False
                 return True
     return False
+
+def validateVersion():
+    versionString = versionVar.get()
+    if not isVersionStringValid(versionString):
+        status.set("Invalid game version!")
+        return False
+    Config.gameVersion = versionString
+    return True
+
+def validatePaksFolder():
+    paksFolderPath = Path(paksVar.get())
+    if not (paksFolderPath.is_dir() and str(paksFolderPath).endswith("DeadByDaylight\\Content\\Paks")):
+        status.set("Invalid paks folder!")
+        return False
+    Config.paksFolder = str(paksFolderPath)
+    return True
+
+def validateMappingFile():
+    mappingFilePath = Path(mappingVar.get())
+    if not (mappingFilePath.is_file() and mappingFilePath.suffix == ".usmap"):
+        status.set("Invalid mapping file!")
+        return False
+    Config.mappingFile = str(mappingFilePath)
+    return True
 
 def exportFiles():
     status.set("Initializing CUE4Parse...")
@@ -112,16 +135,12 @@ def exportFiles():
     toggleButtons(True)
 
 def exportFilesButtonCommand():
-    paksFolder = Path(paksVar.get())
-    if not (paksFolder.is_dir() and str(paksFolder).endswith("DeadByDaylight\\Content\\Paks")):
-        status.set("Invalid paks folder!")
+    if not validateVersion():
         return
-    mappingFile = Path(mappingVar.get())
-    if not (mappingFile.is_file() and mappingFile.suffix == ".usmap"):
-        status.set("Invalid mapping file!")
+    if not validatePaksFolder():
         return
-    Config.paksFolder = str(paksFolder)
-    Config.mappingFile = str(mappingFile)
+    if not validateMappingFile():
+        return
     toggleButtons(False)
     thread = threading.Thread(target = exportFiles)
     thread.start()
@@ -136,11 +155,8 @@ def generate():
     toggleButtons(True)
 
 def generateButtonCommand():
-    validVersion = validateVersion(versionVar.get())
-    if not validVersion:
-        status.set("Invalid game version!")
+    if not validateVersion():
         return
-    Config.gameVersion = versionVar.get()
     toggleButtons(False)
     progressBar.configure(mode = "indeterminate", maximum = 100)
     progressBar.start(10)

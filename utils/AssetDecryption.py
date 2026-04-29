@@ -6,7 +6,6 @@ import Config
 # All credit for these algorithms goes to Masusder
 
 assetEncryptionPrefix = "DbdDAwAC"
-profileEncryptionPrefix = "DbdDAgAC"
 zlibCompressionPrefix = "DbdDAQEB"
 
 def decompress(text):
@@ -54,5 +53,5 @@ def decryptAsset(text, branch):
                 decodedBuffer.append(decodedBytes[i + sliceLength])
             return decryptSymmetrical(decodedBuffer, decryptedKey), resultKeyId
         else:
-            raise Exception("Decryption for version", resultKeyId, "failed! Please add the corresponding access key to the config!")
+            raise Exception(f"Decryption for version {resultKeyId} failed! Please add the corresponding access key to the config!")
     return text, None
