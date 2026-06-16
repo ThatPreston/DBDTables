@@ -43,7 +43,10 @@ def decryptAsset(text, branch):
     if text.startswith(assetEncryptionPrefix):
         noPrefix = text[len(assetEncryptionPrefix):]
         decodedBytes = base64.b64decode(noPrefix)
-        sliceLength = 7 + len(branch)
+        # Slice length consists of the version string, an underscore, the branch string, and a  character.
+        # For example, "10.0.0_live" has a slice length of 12.
+        # Generally, the version length doesn't change (though it did from 9.x.x -> 10.x.x) so we can just add 8 to the branch length for the same result.
+        sliceLength = 8 + len(branch)
         resultKeyId = getKeyId(decodedBytes, sliceLength)
         if resultKeyId in Config.accessKeys:
             s3AccessKey = Config.accessKeys[resultKeyId].replace("-", "+").replace("_", "/")

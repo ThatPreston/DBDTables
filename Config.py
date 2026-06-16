@@ -18,7 +18,7 @@ def load():
             return json.load(f)
     # Default Config
     return {
-        "gameVersion": "9.6.0_live",
+        "gameVersion": "10.0.0_live",
         "paksFolder": "",
         "mappingFile": "",
         "enabledLanguages": ["de", "en", "es", "es-MX", "fr", "it", "ja", "ko", "pl", "pt-BR", "ru", "th", "tr", "zh-Hans", "zh-Hant"],
@@ -28,7 +28,7 @@ def load():
 
 configFile = load()
 
-version = "1.0.3"
+version = "1.0.4"
 gameVersion = configFile["gameVersion"]
 paksFolder = configFile["paksFolder"]
 mappingFile = configFile["mappingFile"]
