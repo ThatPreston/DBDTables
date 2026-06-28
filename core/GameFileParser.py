@@ -63,7 +63,8 @@ killerCategoryMap = [
     ["heads", "legs", "upperBodies"], # Ghoul
     ["heads", "bodies", "weapons"], # Animatronic
     ["heads", "bodies", "weapons"], # Krasue
-    ["heads", "bodies", "weapons"] # First
+    ["heads", "bodies", "weapons"], # First
+    ["heads", "bodies", "weapons"] # Slasher
 ]
 
 # Item rarities (values are pulled from the wiki)

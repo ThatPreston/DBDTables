@@ -2,6 +2,7 @@ from pathlib import Path
 import json
 import sys
 import os
+import copy
 
 rootDir = os.path.dirname(sys.argv[0])
 librariesDir = rootDir + "/libraries/"
@@ -11,39 +12,46 @@ outputPath = rootPath / "output"
 gameFilesPath = rootPath / "files/game"
 decryptedFilesPath = rootPath / "files/decrypted"
 
+version = "1.0.5"
+
+defaultConfig = {
+    "gameVersion": "10.0.1_live",
+    "paksFolder": "",
+    "mappingFile": "",
+    "enabledLanguages": ["de", "en", "es", "es-MX", "fr", "it", "ja", "ko", "pl", "pt-BR", "ru", "th", "tr", "zh-Hans", "zh-Hant"],
+    "accessKeys": {},
+    "extraFiles": []
+}
+
 def load():
+    template = copy.deepcopy(defaultConfig)
     path = rootPath / "config.json"
+    file = None
     if path.is_file():
         with open(path, "r", encoding = "utf-8") as f:
-            return json.load(f)
-    # Default Config
-    return {
-        "gameVersion": "10.0.0_live",
-        "paksFolder": "",
-        "mappingFile": "",
-        "enabledLanguages": ["de", "en", "es", "es-MX", "fr", "it", "ja", "ko", "pl", "pt-BR", "ru", "th", "tr", "zh-Hans", "zh-Hant"],
-        "aesKey": "0x22b1639b548124925cf7b9cbaa09f9ac295fcf0324586d6b37ee1d42670b39b3",
-        "accessKeys": {}
-    }
+            try:
+                file = json.load(f)
+            except json.JSONDecodeError as e:
+                print(f"Failed to load config.json: {e}")
+    if file is not None and isinstance(file, dict):
+        for key, value in file.items():
+            if key in template and isinstance(value, type(template[key])):
+                template[key] = value
+    return template
 
 configFile = load()
 
-version = "1.0.4"
 gameVersion = configFile["gameVersion"]
 paksFolder = configFile["paksFolder"]
 mappingFile = configFile["mappingFile"]
 enabledLanguages = configFile["enabledLanguages"]
-aesKey = configFile["aesKey"]
 accessKeys = configFile["accessKeys"]
+extraFiles = configFile["extraFiles"]
 
 def save():
-    data = {
-        "gameVersion": gameVersion,
-        "paksFolder": paksFolder,
-        "mappingFile": mappingFile,
-        "enabledLanguages": enabledLanguages,
-        "aesKey": aesKey,
-        "accessKeys": accessKeys
-    }
+    # Apply any changes to literal values
+    configFile["gameVersion"] = gameVersion
+    configFile["paksFolder"] = paksFolder
+    configFile["mappingFile"] = mappingFile
     with open(Path(rootPath) / "config.json", "w", encoding = "utf-8") as f:
-        json.dump(data, f, indent = "\t")
+        json.dump(configFile, f, indent = "\t")

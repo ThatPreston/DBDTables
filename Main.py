@@ -2,6 +2,7 @@ from pathlib import Path
 import threading
 import Config
 from core import GameFileExporter, DatatableGenerator
+from utils import FileManager
 from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
@@ -146,6 +147,10 @@ def exportFilesButtonCommand():
     thread.start()
 
 def generate():
+    if len(Config.extraFiles) > 0:
+        status.set("Decrypting extra files...")
+        for name in Config.extraFiles:
+            FileManager.loadBackendFile(name, Config.gameVersion)
     success = DatatableGenerator.generate(status.set)
     if success:
         status.set("Successfully generated " + str(len(Config.enabledLanguages)) + " localized datatables!")

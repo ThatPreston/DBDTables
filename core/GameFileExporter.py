@@ -25,6 +25,8 @@ from System import StringComparer
 provider = None
 exportList = []
 
+aesKey = "0x22b1639b548124925cf7b9cbaa09f9ac295fcf0324586d6b37ee1d42670b39b3"
+
 def getVersionContainer():
     version = tuple(map(int, Config.gameVersion.split("_")[0].split(".")))
     if version < (9, 6, 0):
@@ -39,7 +41,7 @@ def init():
         provider = DefaultFileProvider(DirectoryInfo(Config.paksFolder), [], SearchOption.TopDirectoryOnly, getVersionContainer(), StringComparer.OrdinalIgnoreCase)
         provider.MappingsContainer = FileUsmapTypeMappingsProvider(Config.mappingFile)
         provider.Initialize()
-        provider.SubmitKey(FGuid(0), FAesKey(Config.aesKey))
+        provider.SubmitKey(FGuid(0), FAesKey(aesKey))
         provider.PostMount()
         provider.TryChangeCulture(provider.GetLanguageCode(ELanguage.English))
 
