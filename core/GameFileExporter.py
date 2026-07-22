@@ -11,7 +11,7 @@ sys.path.append(Config.librariesDir)
 clr.AddReference(Config.librariesDir + "CUE4Parse.dll")
 
 from CUE4Parse.FileProvider import DefaultFileProvider
-from CUE4Parse.MappingsProvider import FileUsmapTypeMappingsProvider
+from CUE4Parse.MappingsProvider.Usmap import FileUsmapTypeMappingsProvider
 from CUE4Parse.Compression import OodleHelper, ZlibHelper
 from CUE4Parse.Encryption.Aes import FAesKey
 from CUE4Parse.UE4.Localization import FTextLocalizationResource

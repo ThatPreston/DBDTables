@@ -25,15 +25,16 @@ def assignData(items, outfits, key, riftType, riftNumber, tier, track):
 # If an outfit has no tome/riftPass value but one of its pieces does, the outfit should also have it
 def assignFromPieces(outfit, items):
     for itemKey in outfit["pieces"]:
-        item = items[itemKey]
-        if "tome" in item:
-            outfit["tome"] = item["tome"]
-            outfit["track"] = item["track"]
-            return True
-        elif "riftPass" in item:
-            outfit["riftPass"] = item["riftPass"]
-            outfit["track"] = item["track"]
-            return True
+        if itemKey in items:
+            item = items[itemKey]
+            if "tome" in item:
+                outfit["tome"] = item["tome"]
+                outfit["track"] = item["track"]
+                return True
+            elif "riftPass" in item:
+                outfit["riftPass"] = item["riftPass"]
+                outfit["track"] = item["track"]
+                return True
     return False
 
 def parseTierData(tierData, items, outfits, riftType, riftNumber):

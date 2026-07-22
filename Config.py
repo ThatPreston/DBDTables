@@ -12,7 +12,7 @@ outputPath = rootPath / "output"
 gameFilesPath = rootPath / "files/game"
 decryptedFilesPath = rootPath / "files/decrypted"
 
-version = "1.0.5"
+version = "1.0.6"
 
 defaultConfig = {
     "gameVersion": "10.0.1_live",
