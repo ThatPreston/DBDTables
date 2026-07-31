@@ -4,7 +4,7 @@ import json
 import Config
 from utils import AssetDecryption
 
-remoteContentCachePath = Path(os.getenv("LOCALAPPDATA")) / "DeadByDaylight/Saved/PersistentDownloadDir/RemoteContentCache/"
+remoteContentCachePath = Config.persistentDownloadDirPath / "RemoteContentCache"
 
 # Attempts to load and decrypt the desired backend file from %localappdata%/DeadByDaylight/Saved/PersistentDownloadDir/RemoteContentCache/
 def loadFromRemoteContentCache(name, desiredVersion):

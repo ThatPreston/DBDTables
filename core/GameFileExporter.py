@@ -25,6 +25,8 @@ from System import StringComparer
 provider = None
 exportList = []
 
+dynamicContentPath = Config.persistentDownloadDirPath / "DynamicContent"
+
 aesKey = "0x22b1639b548124925cf7b9cbaa09f9ac295fcf0324586d6b37ee1d42670b39b3"
 
 def getVersionContainer():
@@ -38,7 +40,7 @@ def init():
     if provider is None:
         OodleHelper.Initialize(Config.librariesDir + OodleHelper.OODLE_NAME_CURRENT)
         ZlibHelper.Initialize(Config.librariesDir + ZlibHelper.DLL_NAME)
-        provider = DefaultFileProvider(DirectoryInfo(Config.paksFolder), [], SearchOption.TopDirectoryOnly, getVersionContainer(), StringComparer.OrdinalIgnoreCase)
+        provider = DefaultFileProvider(DirectoryInfo(Config.paksFolder), [DirectoryInfo(str(dynamicContentPath))], SearchOption.AllDirectories, getVersionContainer(), StringComparer.OrdinalIgnoreCase)
         provider.MappingsContainer = FileUsmapTypeMappingsProvider(Config.mappingFile)
         provider.Initialize()
         provider.SubmitKey(FGuid(0), FAesKey(aesKey))

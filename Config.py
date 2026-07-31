@@ -11,8 +11,9 @@ rootPath = Path(rootDir)
 outputPath = rootPath / "output"
 gameFilesPath = rootPath / "files/game"
 decryptedFilesPath = rootPath / "files/decrypted"
+persistentDownloadDirPath = Path(os.getenv("LOCALAPPDATA")) / "DeadByDaylight/Saved/PersistentDownloadDir"
 
-version = "1.0.6"
+version = "1.0.7"
 
 defaultConfig = {
     "gameVersion": "10.0.1_live",
