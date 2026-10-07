@@ -9,6 +9,7 @@ saveDebugFiles = False
 
 locresPath = Config.gameFilesPath / "DeadByDaylight/Content/Localization/DeadByDaylight"
 locresCache = {}
+localizedTexts = {}
 
 def getLocres(language):
     if language in locresCache:
@@ -26,7 +27,9 @@ def getLocalizedString(locres, tableId, key):
         return locres[tableId].get(key)
     return None
 
-def getBestString(data, locres):
+def getBestString(data, language):
+    locres = getLocres(language)
+
     # First check if namespace and key yields a translation
     namespace = data.get("Namespace")
     key = data.get("Key")
@@ -34,17 +37,26 @@ def getBestString(data, locres):
         translation = getLocalizedString(locres, namespace, key)
         if translation is not None:
             return translation.strip()
+
     # Some newer cosmetics use "TableId" instead of "Namespace"
     tableId = data.get("TableId")
     if (tableId is not None) and (key is not None):
         translation = getLocalizedString(locres, tableId.split(".")[-1], key)
         if translation is not None:
             return translation.strip()
+
+    # Check LocalizedTexts.json files (sometimes used for dynamic content)
+    if language in localizedTexts:
+        translation = getLocalizedString(localizedTexts[language], tableId.split(".")[-1], key)
+        if translation is not None:
+            return translation.strip()
+
     # Use LocalizedString if it exists
     localizedString = data.get("LocalizedString")
     if localizedString is not None:
         print(f"No translation found for source string \"{data.get("SourceString")}\"\nUsing localized (en) string: \"{localizedString}\"")
         return localizedString.strip()
+
     return "N/A"
 
 def localize(sortedItems, outfitsList, collectionsList, language, header):
@@ -61,14 +73,14 @@ def localize(sortedItems, outfitsList, collectionsList, language, header):
     # Replace names and descriptions with localized strings
     for category, items in localizedItems.items():
         for item in items:
-            item["name"] = getBestString(item["name"], locres)
-            item["desc"] = getBestString(item["desc"], locres)
+            item["name"] = getBestString(item["name"], language)
+            item["desc"] = getBestString(item["desc"], language)
     for outfit in localizedOutfits:
         if not "fakeOutfit" in outfit:
-            outfit["name"] = getBestString(outfit["name"], locres)
-            outfit["desc"] = getBestString(outfit["desc"], locres)
+            outfit["name"] = getBestString(outfit["name"], language)
+            outfit["desc"] = getBestString(outfit["desc"], language)
     for collection in localizedCollections:
-        collection["name"] = getBestString(collection["name"], locres)
+        collection["name"] = getBestString(collection["name"], language)
 
     # Add collections to the items table
     localizedItems["collections"] = localizedCollections
@@ -88,6 +100,9 @@ def localize(sortedItems, outfitsList, collectionsList, language, header):
 
 def generate(setStatus):
     locresCache.clear()
+
+    global localizedTexts
+    localizedTexts = GameFileParser.mergeLocalizedTexts()
 
     setStatus("Loading game files...")
     items, outfits, collections = GameFileParser.parse()

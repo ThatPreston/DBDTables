@@ -13,10 +13,10 @@ gameFilesPath = rootPath / "files/game"
 decryptedFilesPath = rootPath / "files/decrypted"
 persistentDownloadDirPath = Path(os.getenv("LOCALAPPDATA")) / "DeadByDaylight/Saved/PersistentDownloadDir"
 
-version = "1.0.7"
+version = "1.0.8"
 
 defaultConfig = {
-    "gameVersion": "10.0.1_live",
+    "gameVersion": "10.2.0_live",
     "paksFolder": "",
     "mappingFile": "",
     "enabledLanguages": ["de", "en", "es", "es-MX", "fr", "it", "ja", "ko", "pl", "pt-BR", "ru", "th", "tr", "zh-Hans", "zh-Hant"],

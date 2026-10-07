@@ -21,6 +21,7 @@ from UE4Config.Parsing import InstructionToken, InstructionType
 from Newtonsoft.Json import JsonConvert, Formatting
 from System.IO import DirectoryInfo, SearchOption
 from System import StringComparer
+from System.Text import Encoding
 
 provider = None
 exportList = []
@@ -73,6 +74,8 @@ def populateExportList():
                 exportList.append(file)
             case "DeadByDaylight.locres":
                 exportList.append(file)
+            case "LocalizedTexts.json":
+                exportList.append(file)
     return len(exportList)
 
 def exportFiles(step):
@@ -87,4 +90,7 @@ def exportFiles(step):
                 case "locres":
                     locres = FTextLocalizationResource(file.CreateReader())
                     FileManager.saveJson(Config.gameFilesPath / file.Directory, file.NameWithoutExtension + ".json", JsonConvert.SerializeObject(locres, Formatting.Indented))
+                case "json":
+                    json = Encoding.UTF8.GetString(file.Read())
+                    FileManager.saveJson(Config.gameFilesPath / file.Directory, file.NameWithoutExtension + ".json", json)
             step()

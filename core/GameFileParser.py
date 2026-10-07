@@ -4,13 +4,12 @@ import Config
 exportsPath = Config.gameFilesPath / "DeadByDaylight"
 
 # Maps customization categories to short strings
-# Badges and banners can be uncommented, but I am leaving them out since the original datatables didn't include them
 categoryMap = {
     "ECustomizationCategory::SurvivorHead": "heads",
     "ECustomizationCategory::SurvivorTorso": "torsos",
     "ECustomizationCategory::SurvivorLegs": "legs",
     "ECustomizationCategory::Charm": "charms",
-    "ECustomizationCategory::KillerHead": "masks",
+    "ECustomizationCategory::KillerHead": "heads",
     "ECustomizationCategory::KillerBody": "bodies",
     "ECustomizationCategory::KillerWeapon": "weapons",
     "ECustomizationCategory::Badge": "badges",
@@ -21,51 +20,18 @@ categoryMap = {
 universalCategories = ["charms", "badges", "banners"]
 
 # Maps killer item categories to their killer specific subcategories (for example, the Dredge head slot is used as an arm slot)
-killerCategoryMap = [
-    ["masks", "bodies", "weapons"], # Trapper
-    ["heads", "bodies", "weapons"], # Wraith
-    ["upperBodies", "legs", "weapons"], # Hillbilly
-    ["heads", "bodies", "weapons"], # Nurse
-    ["heads", "bodies", "weapons"], # Shape
-    ["heads", "bodies", "weapons"], # Hag
-    ["heads", "bodies", "weapons"], # Doctor
-    ["masks", "bodies", "weapons"], # Huntress
-    ["heads", "bodies", "weapons"], # Cannibal
-    ["heads", "bodies", "weapons"], # Nightmare
-    ["masks", "bodies", "weapons"], # Pig
-    ["heads", "bodies", "weapons"], # Clown
-    ["heads", "bodies", "weapons"], # Spirit
-    ["masks", "bodies", "weapons"], # Legion
-    ["masks", "bodies", "weapons"], # Plague
-    ["masks", "bodies", "weapons"], # Ghost Face
-    ["heads", "bodies", "weapons"], # Demogorgon
-    ["masks", "bodies", "weapons"], # Oni
-    ["heads", "bodies", "weapons"], # Deathslinger
-    ["heads", "bodies", "weapons"], # Executioner
-    ["heads", "bodies", "weapons"], # Blight
-    ["heads", "bodies", "weapons"], # Twins
-    ["heads", "bodies", "weapons"], # Trickster
-    ["heads", "bodies", "weapons"], # Nemesis
-    ["heads", "bodies", "weapons"], # Cenobite
-    ["heads", "bodies", "weapons"], # Artist
-    ["heads", "bodies", "weapons"], # Onryo
-    ["arms", "bodies", "weapons"], # Dredge
-    ["heads", "bodies", "weapons"], # Mastermind
-    ["heads", "bodies", "weapons"], # Knight
-    ["heads", "bodies", "weapons"], # Skull Merchant
-    ["heads", "bodies", "weapons"], # Singularity
-    ["heads", "bodies", "weapons"], # Xenomorph
-    ["heads", "bodies", "weapons"], # Good Guy
-    ["heads", "bodies", "weapons"], # Unknown
-    ["heads", "bodies", "weapons"], # Lich
-    ["heads", "bodies", "weapons"], # Dark Lord
-    ["heads", "bodies", "weapons"], # Houndmaster
-    ["heads", "legs", "upperBodies"], # Ghoul
-    ["heads", "bodies", "weapons"], # Animatronic
-    ["heads", "bodies", "weapons"], # Krasue
-    ["heads", "bodies", "weapons"], # First
-    ["heads", "bodies", "weapons"] # Slasher
-]
+killerCategoryMap = {
+    0: ["masks", "bodies", "weapons"], # Trapper
+    2: ["upperBodies", "legs", "weapons"], # Hillbilly
+    7: ["masks", "bodies", "weapons"], # Huntress
+    10: ["masks", "bodies", "weapons"], # Pig
+    13: ["masks", "bodies", "weapons"], # Legion
+    14: ["masks", "bodies", "weapons"], # Plague
+    15: ["masks", "bodies", "weapons"], # Ghost Face
+    17: ["masks", "bodies", "weapons"], # Oni
+    27: ["arms", "bodies", "weapons"], # Dredge
+    38: ["heads", "legs", "upperBodies"], # Ghoul
+}
 
 # Item rarities (values are pulled from the wiki)
 rarityMap = {
@@ -94,8 +60,8 @@ def getDescription(data):
 def getActualCategory(category, character, killer):
     if killer:
         # Masks, bodies, and weapons correspond to killer slots
-        if character < len(killerCategoryMap):
-            if category == "masks":
+        if character in killerCategoryMap:
+            if category == "heads":
                 return killerCategoryMap[character][0]
             elif category == "bodies":
                 return killerCategoryMap[character][1]
@@ -139,7 +105,7 @@ def loadCustomizationItemDB(path):
         rows = data[0]["Rows"]
         for key, entry in rows.items():
             # Category
-            category = entry["Category"]
+            category = entry["category"]
             if not category in categoryMap:
                 continue
             category = categoryMap[category]
@@ -183,6 +149,50 @@ def loadOutfitDB(path):
                 "pieces": entry["OutfitItems"]
             })
     return outfitDB
+
+def loadLocalizedTexts(path):
+    parsedLocalizedTexts = {}
+    data = None
+    try:
+        with open(path, "r", encoding = "utf-8") as f:
+            data = json.load(f)
+    except json.decoder.JSONDecodeError:
+        # There are some malformed empty LocalizedTexts.json files, just ignore them
+        pass
+
+    if data is not None:
+        entries = data["allLocalizedText"]
+        for entry in entries:
+            namespace = entry["namespace"]
+            key = entry["key"]
+
+            for translation in entry["translations"]:
+                culture = translation["culture"]
+                cultureDict = parsedLocalizedTexts.setdefault(culture, {})
+                namespaceDict = cultureDict.setdefault(namespace, {})
+
+                sourceString = translation["sourceString"]
+                namespaceDict[key] = sourceString
+    return parsedLocalizedTexts
+
+def mergeLocalizedTexts():
+    merged = {}
+    for parsedLocalizedTexts in loadFiles("LocalizedTexts.json", loadLocalizedTexts):
+        for culture in list(parsedLocalizedTexts):
+            if culture in merged:
+                for namespace, translations in parsedLocalizedTexts[culture].items():
+                    if namespace in merged[culture]:
+                        mergedNamespace = merged[culture]
+                        for key, translation in translations.items():
+                            if key in mergedNamespace:
+                                print(f"Culture {culture} namespace {namespace} key {key} has more than one translation!")
+                            else:
+                                mergedNamespace[key] = translation
+                    else:
+                        merged[culture][namespace] = translations
+            else:
+                merged[culture] = parsedLocalizedTexts[culture]
+    return merged
 
 def loadFiles(name, loadFunction):
     files = []
@@ -229,15 +239,17 @@ def extractCollections(items):
         collectionName = item["collectionName"]
         if "LocalizedString" in collectionName:
             # localizedString.lower().strip() gets rid of most duplicates, but some items refer to the same collection with different spelling or grammar...
-            localizedString = collectionName["LocalizedString"].lower().strip()
-            if localizedString in collections:
-                collectionId = collections[localizedString]["id"]
-            else:
-                collectionId = len(collections) + 1
-                collections[localizedString] = {
-                    "id": collectionId,
-                    "name": collectionName
-                }
+            localizedString = collectionName["LocalizedString"]
+            if localizedString is not None:
+                stripped = localizedString.lower().strip()
+                if stripped in collections:
+                    collectionId = collections[stripped]["id"]
+                else:
+                    collectionId = len(collections) + 1
+                    collections[stripped] = {
+                        "id": collectionId,
+                        "name": collectionName
+                    }
         if collectionId is not None:
             item["collectionId"] = collectionId
         del item["collectionName"]
