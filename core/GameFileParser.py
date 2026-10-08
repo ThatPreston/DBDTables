@@ -1,5 +1,6 @@
 import json
 import Config
+from core import Localization
 
 exportsPath = Config.gameFilesPath / "DeadByDaylight"
 
@@ -150,50 +151,6 @@ def loadOutfitDB(path):
             })
     return outfitDB
 
-def loadLocalizedTexts(path):
-    parsedLocalizedTexts = {}
-    data = None
-    try:
-        with open(path, "r", encoding = "utf-8") as f:
-            data = json.load(f)
-    except json.decoder.JSONDecodeError:
-        # There are some malformed empty LocalizedTexts.json files, just ignore them
-        pass
-
-    if data is not None:
-        entries = data["allLocalizedText"]
-        for entry in entries:
-            namespace = entry["namespace"]
-            key = entry["key"]
-
-            for translation in entry["translations"]:
-                culture = translation["culture"]
-                cultureDict = parsedLocalizedTexts.setdefault(culture, {})
-                namespaceDict = cultureDict.setdefault(namespace, {})
-
-                sourceString = translation["sourceString"]
-                namespaceDict[key] = sourceString
-    return parsedLocalizedTexts
-
-def mergeLocalizedTexts():
-    merged = {}
-    for parsedLocalizedTexts in loadFiles("LocalizedTexts.json", loadLocalizedTexts):
-        for culture in list(parsedLocalizedTexts):
-            if culture in merged:
-                for namespace, translations in parsedLocalizedTexts[culture].items():
-                    if namespace in merged[culture]:
-                        mergedNamespace = merged[culture]
-                        for key, translation in translations.items():
-                            if key in mergedNamespace:
-                                print(f"Culture {culture} namespace {namespace} key {key} has more than one translation!")
-                            else:
-                                mergedNamespace[key] = translation
-                    else:
-                        merged[culture][namespace] = translations
-            else:
-                merged[culture] = parsedLocalizedTexts[culture]
-    return merged
-
 def loadFiles(name, loadFunction):
     files = []
     for path in sorted(exportsPath.rglob(name)):
@@ -237,19 +194,17 @@ def extractCollections(items):
     for key, item in items.items():
         collectionId = None
         collectionName = item["collectionName"]
-        if "LocalizedString" in collectionName:
-            # localizedString.lower().strip() gets rid of most duplicates, but some items refer to the same collection with different spelling or grammar...
-            localizedString = collectionName["LocalizedString"]
-            if localizedString is not None:
-                stripped = localizedString.lower().strip()
-                if stripped in collections:
-                    collectionId = collections[stripped]["id"]
-                else:
-                    collectionId = len(collections) + 1
-                    collections[stripped] = {
-                        "id": collectionId,
-                        "name": collectionName
-                    }
+        identifier = Localization.getBestString(collectionName, "en")
+        if identifier is not None:
+            stripped = identifier.lower().strip()
+            if stripped in collections:
+                collectionId = collections[stripped]["id"]
+            else:
+                collectionId = len(collections) + 1
+                collections[stripped] = {
+                    "id": collectionId,
+                    "name": collectionName
+                }
         if collectionId is not None:
             item["collectionId"] = collectionId
         del item["collectionName"]
